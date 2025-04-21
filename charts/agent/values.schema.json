@@ -1,0 +1,132 @@
+{
+    "title": "Chart Values",
+    "type": "object",
+    "properties": {
+        "credentials": {
+            "type": "object",
+            "properties": {
+                "secretName": {
+                    "type": "string",
+                    "description": "Name of the kubernetes secret to read credentials from",
+                    "default": ""
+                },
+                "poolKey": {
+                    "type": "string",
+                    "description": "The key in the secret to read the pool from",
+                    "default": "JUICE_POOL"
+                },
+                "tokenKey": {
+                    "type": "string",
+                    "description": "The key in the secret to read the token from",
+                    "default": "JUICE_TOKEN"
+                }
+            }
+        },
+        "agent": {
+            "type": "object",
+            "properties": {
+                "port": {
+                    "type": "number",
+                    "description": "The port to run the agent on",
+                    "default": 7865
+                }
+            }
+        },
+        "image": {
+            "type": "object",
+            "properties": {
+                "repository": {
+                    "type": "string",
+                    "description": "Image Repository",
+                    "default": "docker.io/juicelabs/server"
+                },
+                "pullPolicy": {
+                    "type": "string",
+                    "description": "Image Pull policy",
+                    "default": "IfNotPresent"
+                },
+                "tag": {
+                    "type": "string",
+                    "description": "Image Tag",
+                    "default": "latest"
+                }
+            }
+        },
+        "daemonSet": {
+            "type": "boolean",
+            "description": "Run as a DaemonSet rather than a Deployment",
+            "default": false
+        },
+        "replicaCount": {
+            "type": "number",
+            "description": "Replicas to deploy when running as a Deployment",
+            "default": 1
+        },
+        "nameOverride": {
+            "type": "string",
+            "description": "Partially override release name",
+            "default": ""
+        },
+        "fullnameOverride": {
+            "type": "string",
+            "description": "Fully override name",
+            "default": ""
+        },
+        "podAnnotations": {
+            "type": "object",
+            "description": "Annotations to add to pods",
+            "default": {}
+        },
+        "podLabels": {
+            "type": "object",
+            "description": "Labels to add to pods",
+            "default": {}
+        },
+        "env": {
+            "type": "object",
+            "description": "Additional environment variables to add",
+            "default": {}
+        },
+        "envFrom": {
+            "type": "object",
+            "description": "Additional environment variables to add from configmaps or secrets",
+            "default": {}
+        },
+        "nodeSelector": {
+            "type": "object",
+            "description": "Node labels for pod assignment",
+            "default": {}
+        },
+        "tolerations": {
+            "type": "array",
+            "description": "Tolerations for pod assignment",
+            "default": [],
+            "items": {}
+        },
+        "nodeSelectorPreset": {
+            "type": "string",
+            "description": "If no nodeSelector is specified, fallback to looking for GPU nodes",
+            "default": "nvidia.com/gpu.present"
+        },
+        "resources": {
+            "type": "object",
+            "properties": {
+                "requests": {
+                    "type": "object",
+                    "properties": {
+                        "cpu": {
+                            "type": "string",
+                            "description": "CPU Requests",
+                            "default": "500m"
+                        },
+                        "memory": {
+                            "type": "string",
+                            "description": "Memory Requests",
+                            "default": "128Mi"
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

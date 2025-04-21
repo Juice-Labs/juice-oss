@@ -1,0 +1,1 @@
+docker run -ti --rm -v `pwd`:/data dockeralexh/readme-generator-for-helm:2.6.1 -v /data/values.yaml -r /data/README.md -s /data/values.schema.json

@@ -1,0 +1,71 @@
+{{ define "juice-agent.spec" }}
+topologySpreadConstraints:
+- labelSelector:
+  matchLabels:
+    app.kubernetes.io/name: {{ .Release.Name }}
+  maxSkew: 1
+  topologyKey: kubernetes.io/hostname
+  whenUnsatisfiable: DoNotSchedule
+{{- if .Values.hostNetwork }}
+hostNetwork: true
+{{- end }}
+containers:
+- name: agent
+  image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+  imagePullPolicy: {{ .Values.image.pullPolicy }}
+  ports:
+  - name: agent
+    containerPort: {{ .Values.agent.port }}
+  {{- with .Values.envFrom }}
+  envFrom:
+    {{- toYaml . | nindent 6 }}
+  {{- end }}
+  env:
+  - name: JUICE_POOL
+    valueFrom:
+      secretKeyRef:
+        name: {{ .Values.credentials.secretName | required "credentials.secretName is required." }}
+        key: {{ .Values.credentials.poolKey }}
+  - name: JUICE_TOKEN
+    valueFrom:
+      secretKeyRef:
+        name: {{ .Values.credentials.secretName }}
+        key: {{ .Values.credentials.tokenKey }}
+  - name: JUICE_HOST_IP
+    valueFrom:
+      fieldRef:
+        fieldPath: status.podIP
+  {{- if .Values.env }}
+  {{- range $k, $v := .Values.env }}
+  - name: {{ $k }}
+    value: "{{ $v }}"
+  {{- end }}
+  {{- end }}
+  {{- with .Values.securityContext }}
+  securityContext:
+    {{- toYaml . | nindent 4 }}
+  {{ end }}
+  {{- with .Values.resources }}
+  resources:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  volumeMounts:
+  - name: config
+    mountPath: /home/juice/.config/Juice GPU
+  - name: cache
+    mountPath: /home/juice/.cache/Juice GPU
+  - name: tmp
+    mountPath: /tmp
+nodeSelector:
+  {{- include "juice-agent.nodeSelector" . | trim | nindent 2 }}
+tolerations:
+  {{- include "juice-agent.tolerations" . }}
+volumes:
+- name: config
+  emptyDir:
+- name: cache
+  emptyDir:
+- name: tmp
+  emptyDir:
+{{- end }}
+    

@@ -1,0 +1,69 @@
+
+## @section Credentials
+## Agent credentials
+## @param credentials.secretName Name of the kubernetes secret to read credentials from
+## @param credentials.poolKey The key in the secret to read the pool from
+## @param credentials.tokenKey The key in the secret to read the token from
+credentials:
+  secretName: ""
+  poolKey: JUICE_POOL
+  tokenKey: JUICE_TOKEN
+
+## @section Agent Settings
+## @param agent.port The port to run the agent on
+agent:
+  port: 7865
+
+## @section Image
+## @param image.repository Image Repository
+## @param image.pullPolicy Image Pull policy
+## @param image.tag Image Tag
+image:
+  repository: docker.io/juicelabs/agent
+  pullPolicy: IfNotPresent
+  tag: latest
+
+## @section Deployment
+## @param daemonSet Run as a DaemonSet rather than a Deployment
+daemonSet: false 
+## @param replicaCount Replicas to deploy when running as a Deployment
+replicaCount: 1
+## @param nameOverride Partially override release name
+nameOverride: ""
+## @param fullnameOverride Fully override name
+fullnameOverride: ""
+## @param podAnnotations Annotations to add to pods
+podAnnotations: {}
+## @param podLabels Labels to add to pods
+podLabels: {}
+## @param env Additional environment variables to add
+env: {}
+## @param envFrom Additional environment variables to add from configmaps or secrets
+envFrom: {}
+## @param nodeSelector Node labels for pod assignment
+nodeSelector: {}
+## @param tolerations Tolerations for pod assignment
+tolerations: []
+## @param nodeSelectorPreset If no nodeSelector is specified, fallback to looking for GPU nodes
+nodeSelectorPreset: "nvidia.com/gpu.present"
+
+
+## @skip securityContext
+securityContext:
+  capabilities:
+    drop:
+    - ALL
+  readOnlyRootFilesystem: true
+  runAsNonRoot: true
+  runAsUser: 1000
+
+## @section Resources
+## @param resources.requests.cpu CPU Requests
+## @param resources.requests.memory Memory Requests
+resources:
+  requests:
+    cpu: 500m
+    memory: 128Mi
+
+
+

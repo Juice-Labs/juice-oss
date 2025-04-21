@@ -1,0 +1,23 @@
+{{- if .Values.daemonSet }}
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: {{ include "juice-agent.fullname" . }}
+  labels:
+    {{- include "juice-agent.labels" . | nindent 4 }}
+spec:
+  serviceName: {{ include "juice-agent.fullname" . }}
+  selector:
+    matchLabels:
+      {{- include "juice-agent.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "juice-agent.labels" . | nindent 8 }}
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    spec:
+      {{- include "juice-agent.spec" . | indent 6 }}
+{{- end }}
