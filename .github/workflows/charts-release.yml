@@ -32,6 +32,8 @@ jobs:
 
       - name: debug
         run: |
+          ls -al
+          git diff 11376256e42dbeda4b1a954cac7bb1fa856f188d
           ct list-changed --chart-dirs charts --since 11376256e42dbeda4b1a954cac7bb1fa856f188d
           
       - name: Run chart-testing (list-changed)
