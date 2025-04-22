@@ -2,10 +2,10 @@ name: Release Helm Charts
 
 on:
   push:
-    # branches:
-    #   - main
-    # paths:
-    #   - charts/**/Chart.yaml
+    branches:
+      - main
+    paths:
+      - charts/**/Chart.yaml
 
 jobs:
   release-helm-chart:
@@ -28,17 +28,11 @@ jobs:
 
       - name: Set up chart-testing
         uses: helm/chart-testing-action@v2.7.0
-
-      - name: Show commit exists
-        run: |
-          ls charts
-          git show 4294cd1fb243eedeefd1b4491446edd28488cb74
-          ct list-changed --chart-dirs charts --since 4294cd1fb243eedeefd1b4491446edd28488cb74
       
       - name: Run chart-testing (list-changed)
         id: list-changed
         run: |
-          changed=$(ct list-changed --chart-dirs charts --since 4294cd1fb243eedeefd1b4491446edd28488cb74)
+          changed=$(ct list-changed --chart-dirs charts --since ${{ github.event.before }})
           if [[ -n "$changed" ]]; then
             echo "::set-output name=changed::true"
             echo "::set-output name=changed_list::$changed"
