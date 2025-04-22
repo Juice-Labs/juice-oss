@@ -30,7 +30,10 @@ jobs:
         uses: helm/chart-testing-action@v2.3.1
 
       - name: Show commit exists
-        run: git show 4294cd1fb243eedeefd1b4491446edd28488cb74
+        run: |
+          ls charts
+          git show 4294cd1fb243eedeefd1b4491446edd28488cb74
+          ct list-changed --chart-dirs charts --since 4294cd1fb243eedeefd1b4491446edd28488cb74 --debug
       
       - name: Run chart-testing (list-changed)
         id: list-changed
