@@ -1,6 +1,6 @@
 apiVersion: v2
 name: agent
-version: 1.0.1
+version: 1.0.0
 type: application
 home: https://juicelabs.co
 icon: https://raw.githubusercontent.com/Juice-Labs/Juice-Labs/master/assets/Juice.svg
