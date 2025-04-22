@@ -33,7 +33,7 @@ jobs:
         run: |
           ls charts
           git show 4294cd1fb243eedeefd1b4491446edd28488cb74
-          ct list-changed --chart-dirs charts --since 4294cd1fb243eedeefd1b4491446edd28488cb74 --debug
+          ct list-changed --chart-dirs charts --since 4294cd1fb243eedeefd1b4491446edd28488cb74
       
       - name: Run chart-testing (list-changed)
         id: list-changed
