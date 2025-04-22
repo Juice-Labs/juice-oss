@@ -1,14 +1,15 @@
 name: Helm Charts
 
 on:
-  push:
-    branches:
-    - main
-    paths:
-    - charts/**/Chart.yaml
+  pull_request:
+  # push:
+    # branches:
+    # - main
+    # paths:
+    # - charts/**/Chart.yaml
 
 jobs:
-  release:
+  release-helm-chart:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -29,10 +30,14 @@ jobs:
       - name: Set up chart-testing
         uses: helm/chart-testing-action@v2.3.1
 
+      - name: debug
+        run: |
+          ct list-changed --chart-dirs charts --since ${{ github.event.pull_request.base.sha }}
+          
       - name: Run chart-testing (list-changed)
         id: list-changed
         run: |
-          changed=$(ct list-changed --chart-dirs Juice-Labs/charts --since ${{ github.event.before }})
+          changed=$(ct list-changed --chart-dirs charts --since ${{ github.event.pull_request.base.sha }})
           if [[ -n "$changed" ]]; then
             echo "::set-output name=changed::true"
             echo "::set-output name=changed_list::$changed"
