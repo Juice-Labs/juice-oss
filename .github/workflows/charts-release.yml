@@ -32,7 +32,7 @@ jobs:
       - name: Run chart-testing (list-changed)
         id: list-changed
         run: |
-          changed=$(ct list-changed --chart-dirs charts --since ${{ github.event.before }}))
+          changed=$(ct list-changed --chart-dirs charts --since ${{ github.event.before }})
           if [[ -n "$changed" ]]; then
             echo "::set-output name=changed::true"
             echo "::set-output name=changed_list::$changed"
