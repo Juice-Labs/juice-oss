@@ -16,7 +16,7 @@ This chart deploys [Juice Agents](https://juicelabs.co/) on a [Kubernetes](http:
 
 ## Installing the Chart
 
-Before install the chart, an authentication token must be created for the agents. Additionally, you will need to determine the pool in which the agents will operate.
+Before installing the chart a [m2m token](https://docs.juicelabs.co/docs/juice/user-guide/cli-app/m2m-tokens) must be created for the agents. Additionally, you will need to determine the pool in which the agents will operate.
 
 ### Creating the authentication token
 This can be done by logging into Juice on your desktop machine and then executing the following command.
