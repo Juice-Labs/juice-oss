@@ -72,7 +72,7 @@ You can then view the logs with:
 
 Run the following command to start the container
 ```bash
-docker run --rm \
+docker run \
    --name juice-agent \
    --gpus all \
    -p 7865:7865/udp \
