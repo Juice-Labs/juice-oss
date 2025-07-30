@@ -34,7 +34,7 @@ RUN CUDA_VERSION=$(realpath /usr/local/cuda | cut -d "-" -f2) && \
 COPY root/ /build
 RUN sed -e "s/<<VK_API_VERSION>>/${VK_API_VERSION}/" /build/usr/share/vulkan/icd.d/nvidia_icd.json && \
     chmod 755 /build/home/juice/start-agent.sh && \
-    chown 1000:1000 /build/home/juice/start-agent.sh
+    chown 1000:1000 /build/home/juice -R
 
 FROM ${BASE_CONTAINER}
 ARG VK_API_VERSION
