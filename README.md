@@ -21,3 +21,14 @@ GPU capacity is increasingly critical to major trends in computing, but its use 
 1. **Any client workload can access GPU from anywhere, creating new capabilities**
 1. **GPU capacity is pooled and shared across wide areas -- GPU hardware scales independently of other computing resources**
 1. **GPU utilization is driven much higher, and stranded capacity is rescued, by dynamically adding multiple clients to the same GPU based on resource needs and availability -- i.e. more workloads are served with the same GPU hardware**
+
+# Getting Started
+
+To get started visit https://app.juicelabs.co to sign up free, then pick one of the Agent installation methods below:
+
+ * Bare Metal and Virtual Machines: [Installer](installer/)
+ * Docker and Docker Compose: [Dockerfile](docker/agent/)
+ * Kubernetes: [Helm Charts](charts/agent/)
+
+
+
