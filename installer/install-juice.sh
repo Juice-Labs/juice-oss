@@ -578,7 +578,7 @@ create_users_and_directories() {
 
     $SUDO mkdir -p ${DATA_DIR}
     uid=$(id -u ${INSTALL_USER})
-    $SUDO ${INSTALL_DIR}/juice --no-banner --token ${INSTALL_JUICE_TOKEN} agent service install --config-directory ${DATA_DIR} --desktop-user ${uid} ${INSTALL_JUICE_POOL}
+    $SUDO ${INSTALL_DIR}/juice --no-banner --token ${INSTALL_JUICE_TOKEN} agent service install --config-directory ${DATA_DIR} --desktop-user ${uid} ${INSTALL_JUICE_POOL} > /dev/null 2>&1
     
     $SUDO chown -R ${INSTALL_USER}:${INSTALL_USER} ${DATA_DIR}
 }
@@ -587,6 +587,12 @@ install_binaries() {
     $SUDO tar -xzf ${TMP_BIN} -C ${INSTALL_DIR}
     # Abort if extact command failed
     [ $? -eq 0 ] || fatal 'Binary installation failed'
+
+    cwd=$(pwd)
+    cd ${INSTALL_DIR}
+    $SUDO sed -i '/  uninstall\.sh$/d' sha256sums
+    sha256sum uninstall.sh | $SUDO tee -a sha256sums > /dev/null
+    cd ${cwd}
 }
 
 # --- disable current service if loaded --
