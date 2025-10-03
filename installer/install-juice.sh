@@ -17,6 +17,12 @@ set -o noglob
 #     Environment variables which begin with JUICE_ will be preserved for the
 #     systemd service to use. 
 #
+#   - INSTALL_JUICE_TOKEN (required)
+#     The m2m token created on the web at https://app.juicelabs.co
+#
+#   - INSTALL_JUICE_POOL
+#     The pool name or id to run the agent in, will not install the service if not supplied
+#
 #   - INSTALL_JUICE_FORCE_RESTART
 #     If set to true will always restart the Juice service
 #
@@ -141,7 +147,7 @@ verify_libaries() {
 
     # Required glibc version
     required_major=2
-    required_minor=31
+    required_minor=27
 
     ldd_output=$(ldd --version 2>/dev/null | head -n1)
     version=$(echo "$ldd_output" | grep -o '[0-9][0-9]*\.[0-9][0-9]*' | head -n1)
@@ -734,9 +740,12 @@ eval set -- $(escape "${INSTALL_JUICE_EXEC}") $(quote "$@")
     systemd_disable
     install_binaries
     create_symlinks
-    create_users_and_directories
-    create_service_file
-    service_enable_and_start
+
+    if [ ! -z $INSTALL_JUICE_POOL ]; then
+        create_users_and_directories
+        create_service_file
+        service_enable_and_start
+    fi
 }
 
 
