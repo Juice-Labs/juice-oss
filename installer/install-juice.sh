@@ -43,6 +43,9 @@ set -o noglob
 #   - INSTALL_JUICE_USER
 #     Username to run the Juice service as, defaults to 'juice'
 #
+#   - INSTALL_JUICE_CONTROLLER
+#     Set a custom Juice Controller
+#
 #   - INSTALL_JUICE_INSTALL_DIR
 #     Directory to install the binariesand uninstall script to, or use
 #     /usr/local and /opt as the default
@@ -115,7 +118,6 @@ verify_system() {
     verify_supervisor
     verify_libaries
     verify_downloader curl || verify_downloader wget || fatal 'Can not find curl or wget for downloading files'
-    verify_token
 }
 
 # --- fatal if no systemd or openrc ---
@@ -201,13 +203,13 @@ verify_token() {
         fatal "INSTALL_JUICE_TOKEN is not set"
     fi
     info "Checking token"
-    check_url="https://electra.juicelabs.co/v1/status"
+    check_url="https://${INSTALL_CONTROLLER}/v1/status"
     case $DOWNLOADER in
         curl)
             curl -f -L -s -S -H "Authorization: Bearer ${INSTALL_JUICE_TOKEN}" ${check_url} > /dev/null 2>&1
             ;;
         wget)
-           wget -qO - --spider --header "Authorization: Bearer ${INSTALL_JUICE_TOKEN}" ${check_url} > /dev/null 2>&1
+            wget -qO - --spider --header "Authorization: Bearer ${INSTALL_JUICE_TOKEN}" ${check_url} > /dev/null 2>&1
             ;;
         *)
             fatal "Incorrect downloader executable '$DOWNLOADER'"
@@ -295,6 +297,13 @@ setup_env() {
         CREATE_USER=0
     fi
 
+    # --- use default controller if not defined
+    if [ -n "${INSTALL_JUICE_CONTROLLER}" ]; then
+        INSTALL_CONTROLLER=${INSTALL_JUICE_CONTROLLER}
+    else
+        INSTALL_CONTROLLER="electra.juicelabs.co"
+    fi
+
     # --- get hash of config & exec for currently installed juice ---
     PRE_INSTALL_HASHES=$(get_installed_hashes)
 }
@@ -354,7 +363,7 @@ get_release_version() {
             ;;
 
             *)
-            version_url="https://electra.juicelabs.co/v1/user/releases"
+            version_url="https://${INSTALL_CONTROLLER}/v1/user/releases"
             case $DOWNLOADER in
                 curl)
                     VERSION_SUFFIX=$(curl -w -L -s -S -H "Authorization: Bearer ${INSTALL_JUICE_TOKEN}" ${version_url} | sed -n "s/.*\"version\":\"${INSTALL_JUICE_VERSION}\([^\"]*\)\".*/\1/p")
@@ -375,7 +384,7 @@ get_release_version() {
         esac
     else
         info "Finding release"
-        version_url="https://electra.juicelabs.co/v1/build/latest"
+        version_url="https://${INSTALL_CONTROLLER}/v1/build/latest"
         case $DOWNLOADER in
             curl)
                 VERSION_JUICE=$(curl -w -L -s -S -H "Authorization: Bearer ${INSTALL_JUICE_TOKEN}" ${version_url} | sed -n 's/.*"version":"\([^"]*\)".*/\1/p')
@@ -393,7 +402,7 @@ get_release_version() {
 
 get_release_hash_and_url() {
     info "Getting release hash and url"
-    build_url="https://electra.juicelabs.co/v1/build/${VERSION_JUICE}"
+    build_url="https://${INSTALL_CONTROLLER}/v1/build/${VERSION_JUICE}"
     case $DOWNLOADER in
         curl)
             HASH_EXPECTED=$(curl -w -L -s -S -H "Authorization: Bearer ${INSTALL_JUICE_TOKEN}" ${build_url} | sed -n 's/.*"linuxFilenameSha256sum":"\([^[:space:]]*\).*/\1/p')
@@ -406,7 +415,7 @@ get_release_hash_and_url() {
             ;;
     esac   
 
-    release_url="https://electra.juicelabs.co/v2/download/linux/${VERSION_JUICE}"
+    release_url="https://${INSTALL_CONTROLLER}/v2/download/linux/${VERSION_JUICE}"
     case $DOWNLOADER in
         curl)
             BIN_URL=$(curl -w -L -s -S -H "Authorization: Bearer ${INSTALL_JUICE_TOKEN}" ${release_url} | sed -n 's/.*"url":"\([^"]*\)".*/\1/p' | sed 's/\\u0026/\&/g' )
@@ -584,7 +593,7 @@ create_users_and_directories() {
 
     $SUDO mkdir -p ${DATA_DIR}
     uid=$(id -u ${INSTALL_USER})
-    $SUDO ${INSTALL_DIR}/juice --no-banner --token ${INSTALL_JUICE_TOKEN} agent service install --config-directory ${DATA_DIR} --desktop-user ${uid} ${INSTALL_JUICE_POOL}
+    $SUDO ${INSTALL_DIR}/juice --no-banner --controller ${INSTALL_CONTROLLER} --token ${INSTALL_JUICE_TOKEN} agent service install --config-directory ${DATA_DIR} --desktop-user ${uid} ${INSTALL_JUICE_POOL} > /dev/null 2>&1
     
     $SUDO chown -R ${INSTALL_USER}:${INSTALL_USER} ${DATA_DIR}
 }
@@ -593,6 +602,12 @@ install_binaries() {
     $SUDO tar -xzf ${TMP_BIN} -C ${INSTALL_DIR}
     # Abort if extact command failed
     [ $? -eq 0 ] || fatal 'Binary installation failed'
+
+    cwd=$(pwd)
+    cd ${INSTALL_DIR}
+    $SUDO sed -i '/  uninstall\.sh$/d' sha256sums
+    sha256sum uninstall.sh | $SUDO tee -a sha256sums > /dev/null
+    cd ${cwd}
 }
 
 # --- disable current service if loaded --
@@ -735,6 +750,7 @@ eval set -- $(escape "${INSTALL_JUICE_EXEC}") $(quote "$@")
 {
     verify_system
     setup_env "$@"
+    verify_token
     download_and_verify
     create_uninstall
     systemd_disable
