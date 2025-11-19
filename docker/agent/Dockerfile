@@ -1,4 +1,4 @@
-ARG BASE_CONTAINER=nvidia/cuda:12.6.3-cudnn-runtime-ubuntu22.04
+ARG BASE_CONTAINER=nvidia/cuda:13.0.2-cudnn-runtime-ubuntu24.04
 ARG VIDEOSDK_VERSION=12.0.16
 ARG VK_API_VERSION=1.2.203
 
@@ -62,6 +62,7 @@ RUN apt-get update && \
     apt-get install -y libnuma1 && \
     rm -rf /var/lib/apt/lists/* && \
 # Add juice user
+    userdel ubuntu && \
     useradd -u 1000 -ms /bin/bash juice
 
 
@@ -75,6 +76,6 @@ USER juice
 WORKDIR /home/juice/
 CMD ["./start-agent.sh"]
 
-LABEL "maintainer"="JUICE TECHNOLOGIES <juicelabs.co>"
+LABEL "maintainer"="JUICE TECHNOLOGIES <support@juicelabs.co>"
 LABEL "juicelabs.co/vulkan/api_version"=${VK_API_VERSION}
 LABEL "juicelabs.co/version"=${JUICE_VERSION}
