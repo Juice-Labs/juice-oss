@@ -170,14 +170,14 @@ verify_libaries() {
         warn "Could not determine glibc version"
     fi
 
-    lib_file=$(mktemp)
-    ldconfig -p 2>/dev/null > $lib_file
+    installed_libs=$(ldconfig -p 2>/dev/null)
 
     client_deps="libnuma libatomic"
     agent_deps="libvulkan libgl libnvidia-encode"
 
     for dep in ${client_deps}; do
-        if ! grep -q $dep $lib_file; then
+        info "$dep"
+        if ! echo "$installed_libs" | grep -q $dep; then
             error "missing library $dep"
             errors=1
         fi
@@ -185,7 +185,8 @@ verify_libaries() {
 
     missing_for_agent=""
     for dep in ${agent_deps}; do
-        if ! grep -q $dep $lib_file; then
+        info "$dep"
+        if ! echo "$installed_libs" | grep -q $dep; then
             if [ -z "${INSTALL_JUICE_POOL}" ]; then
                 missing_for_agent="$dep $missing_for_agent"
             else
@@ -194,8 +195,6 @@ verify_libaries() {
             fi
         fi
     done
-
-    rm $lib_file
 
     if [ "$errors" -gt 0 ]; then
         fatal 'Please correct the above errors'
