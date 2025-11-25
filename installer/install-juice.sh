@@ -169,30 +169,39 @@ verify_libaries() {
     else
         warn "Could not determine glibc version"
     fi
-    
-    if ! ldconfig -p 2>/dev/null | grep -q libnuma; then
-        error 'missing library libnuma'
-        errors=1
-    fi
 
-    if ! ldconfig -p 2>/dev/null | grep -q libatomic; then
-        error 'missing library libatomic'
-        errors=1
-    fi
+    installed_libs=$(ldconfig -p 2>/dev/null)
 
-    if ! ldconfig -p 2>/dev/null | grep -q libvulkan; then
-        error 'missing library libvulkan'
-        errors=1
-    fi
+    client_deps="libnuma libatomic"
+    agent_deps="libvulkan libgl libnvidia-encode"
 
+    for dep in ${client_deps}; do
+        info "$dep"
+        if ! echo "$installed_libs" | grep -q $dep; then
+            error "missing library $dep"
+            errors=1
+        fi
+    done
 
-    if ! ldconfig -p 2>/dev/null | grep -q libgl; then
-        error 'missing library libgl'
-        errors=1
-    fi
+    missing_for_agent=""
+    for dep in ${agent_deps}; do
+        info "$dep"
+        if ! echo "$installed_libs" | grep -q $dep; then
+            if [ -z "${INSTALL_JUICE_POOL}" ]; then
+                missing_for_agent="$dep $missing_for_agent"
+            else
+                error "missing library $dep"
+                errors=1
+            fi
+        fi
+    done
 
     if [ "$errors" -gt 0 ]; then
         fatal 'Please correct the above errors'
+    fi
+
+    if [ -n "$missing_for_agent" ]; then
+        warn "Client dependencies are met, but the following are missing if you want to run an agent: $missing_for_agent"
     fi
 }
 
@@ -347,6 +356,7 @@ setup_tmp() {
         code=$?
         set +e
         trap - EXIT
+        info "Cleaning up temporary files"
         rm -rf ${TMP_DIR}
         exit $code
     }
@@ -467,7 +477,6 @@ download_binary() {
     SIMPLE_URL=$(echo "${BIN_URL}" | sed 's/?.*$//')
     info "Downloading binary ${SIMPLE_URL} to ${TMP_BIN}"
     download ${TMP_BIN} ${BIN_URL}
-    cp ${TMP_BIN} /tmp/juice-linux.tar.gz
 }
 
 # --- verify downloaded binary hash ---
@@ -593,7 +602,14 @@ create_users_and_directories() {
 
     $SUDO mkdir -p ${DATA_DIR}
     uid=$(id -u ${INSTALL_USER})
-    $SUDO ${INSTALL_DIR}/juice --no-banner --controller ${INSTALL_CONTROLLER} --token ${INSTALL_JUICE_TOKEN} agent service install --config-directory ${DATA_DIR} --desktop-user ${uid} ${INSTALL_JUICE_POOL} > /dev/null 2>&1
+    $SUDO ${INSTALL_DIR}/juice \
+        --no-banner \
+        --controller ${INSTALL_CONTROLLER} \
+        --token ${INSTALL_JUICE_TOKEN} \
+        agent service install \
+        --config-directory ${DATA_DIR} \
+        --desktop-user ${uid} \
+        ${INSTALL_JUICE_POOL} > /dev/null 2>&1 || fatal "Could not install service"
     
     $SUDO chown -R ${INSTALL_USER}:${INSTALL_USER} ${DATA_DIR}
 }
@@ -763,5 +779,3 @@ eval set -- $(escape "${INSTALL_JUICE_EXEC}") $(quote "$@")
         service_enable_and_start
     fi
 }
-
-
