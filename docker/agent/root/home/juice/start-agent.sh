@@ -24,6 +24,6 @@ fi
 ARGS="agent --log-file stdout run $JUICE_POOL --gateway-port $JUICE_HOST_PORT --gateway-ips $JUICE_HOST_IP $JUICE_ADDITIONAL_ARGS"
 
 echo "Logging in..."
-./juice login -t $JUICE_TOKEN
+./juice/juice login -t $JUICE_TOKEN
 echo "Starting agent: ./juice $ARGS"
-exec ./juice $ARGS
+exec ./juice/juice $ARGS
