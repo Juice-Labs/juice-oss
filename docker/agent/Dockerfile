@@ -69,8 +69,9 @@ ENV VIDEOSDK_VERSION=13.0.37
 # NVIDIA dependencies
 # =============================================================================
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    gnupg2 curl ca-certificates && \
+RUN apt-get update && \
+    apt-get install -y --only-upgrade $(apt-get --just-print upgrade | awk 'tolower($4) ~ /.*security.*/ || tolower($5) ~ /.*security.*/ {print $2}' | sort | uniq) && \
+    apt-get install -y --no-install-recommends gnupg2 curl ca-certificates && \
     curl -fsSL https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/${NVARCH}/3bf863cc.pub | apt-key add - && \
     echo "deb https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2404/${NVARCH} /" > /etc/apt/sources.list.d/cuda.list && \
     apt-get update && apt-get install -y --no-install-recommends \
