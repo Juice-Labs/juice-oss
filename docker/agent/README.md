@@ -86,7 +86,7 @@ docker run \
 
 ## Parameters
 
-The container is configured using environment variables passed at runtime (such as those above). 
+The container is configured using environment variables passed at runtime (such as those above).
 
 | Parameter | Default Value | Descripton |
 | --- | --- | --- |
@@ -108,3 +108,10 @@ If you choose to continue using the latest tag, you will need to force Docker to
 and then restarting your container with compose:
 
 `docker compose up -d`
+
+
+### Building
+
+To build this docker file yourself you will need two things:
+ * The latest juice-gpu-linux.tar.gz, downloaded from: https://app.juicelabs.co
+ * Nvidia Video SDK, downloaded from: https://developer.nvidia.com/nvidia-video-codec-sdk
