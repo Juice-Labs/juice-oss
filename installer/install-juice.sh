@@ -15,7 +15,7 @@ set -o noglob
 # Environment variables:
 #   - JUICE_*
 #     Environment variables which begin with JUICE_ will be preserved for the
-#     systemd service to use. 
+#     systemd service to use.
 #
 #   - INSTALL_JUICE_TOKEN (required)
 #     The m2m token created on the web at https://app.juicelabs.co
@@ -153,11 +153,11 @@ verify_libaries() {
 
     ldd_output=$(ldd --version 2>/dev/null | head -n1)
     version=$(echo "$ldd_output" | grep -o '[0-9][0-9]*\.[0-9][0-9]*' | head -n1)
-    
+
     if [ -n "$version" ]; then
         major=$(echo "$version" | cut -d. -f1)
         minor=$(echo "$version" | cut -d. -f2)
-        
+
         if [ -n "$major" ] && [ -n "$minor" ]; then
             if [ "$major" -lt "$required_major" ] || ( [ "$major" -eq "$required_major" ] && [ "$minor" -lt "$required_minor" ] ); then
                 error "glibc version must be at least $required_major.$required_minor, found $major.$minor"
@@ -324,7 +324,7 @@ verify_juice_is_executable() {
     fi
 }
 
-# --- set arch and suffix, fatal if architecture not supported ---
+# --- set arch, fatal if architecture not supported ---
 setup_verify_arch() {
     if [ -z "$ARCH" ]; then
         ARCH=$(uname -m)
@@ -332,15 +332,12 @@ setup_verify_arch() {
     case $ARCH in
         amd64)
             ARCH=amd64
-            SUFFIX=
             ;;
         x86_64)
             ARCH=amd64
-            SUFFIX=
             ;;
         arm64)
             ARCH=arm64
-            SUFFIX=-${ARCH}
             ;;
         *)
             fatal "Unsupported architecture $ARCH"
@@ -423,9 +420,9 @@ get_release_hash_and_url() {
         *)
             fatal "Incorrect downloader executable '$DOWNLOADER'"
             ;;
-    esac   
+    esac
 
-    release_url="https://${INSTALL_CONTROLLER}/v2/download/linux/${VERSION_JUICE}"
+    release_url="https://${INSTALL_CONTROLLER}/v3/download/linux/${ARCH}/${VERSION_JUICE}"
     case $DOWNLOADER in
         curl)
             BIN_URL=$(curl -w -L -s -S -H "Authorization: Bearer ${INSTALL_JUICE_TOKEN}" ${release_url} | sed -n 's/.*"url":"\([^"]*\)".*/\1/p' | sed 's/\\u0026/\&/g' )
@@ -586,7 +583,7 @@ create_users_and_directories() {
     # Create juice user if it doesn't exist
     if [ ${CREATE_USER} -eq 1 ]; then
         info "Creating ${INSTALL_USER} user"
-        
+
         # Try useradd first (most common)
         if command -v useradd >/dev/null 2>&1; then
             $SUDO useradd --system --user-group --home-dir ${DATA_DIR} --no-create-home --shell /bin/false ${INSTALL_USER}
@@ -610,7 +607,7 @@ create_users_and_directories() {
         --config-directory ${DATA_DIR} \
         --desktop-user ${uid} \
         ${INSTALL_JUICE_POOL} > /dev/null 2>&1 || fatal "Could not install service"
-    
+
     $SUDO chown -R ${INSTALL_USER}:${INSTALL_USER} ${DATA_DIR}
 }
 
