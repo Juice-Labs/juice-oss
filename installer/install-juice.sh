@@ -97,9 +97,8 @@ quote() {
 
 # --- add indentation and trailing slash to quoted args ---
 quote_indent() {
-    printf ' \\\n'
     for arg in "$@"; do
-        printf '\t%s \\\n' "$(quote "$arg")"
+        printf ' \\\n\t%s' "$(quote "$arg")"
     done
 }
 
@@ -176,7 +175,7 @@ verify_libaries() {
     agent_deps="libvulkan libgl libnvidia-encode"
 
     for dep in ${client_deps}; do
-        info "$dep"
+        info " - Checking $dep"
         if ! echo "$installed_libs" | grep -q $dep; then
             error "missing library $dep"
             errors=1
@@ -185,7 +184,7 @@ verify_libaries() {
 
     missing_for_agent=""
     for dep in ${agent_deps}; do
-        info "$dep"
+        info " - Checking $dep"
         if ! echo "$installed_libs" | grep -q $dep; then
             if [ -z "${INSTALL_JUICE_POOL}" ]; then
                 missing_for_agent="$dep $missing_for_agent"
@@ -236,8 +235,7 @@ setup_env() {
     CMD_JUICE=juice
     BIN_DIR=/usr/local/bin
     DATA_DIR=/var/lib/juice
-    CMD_JUICE_EXEC="agent run --service --service-config \"${DATA_DIR}/agent_service.cfg\" --config-directory \"${DATA_DIR}\" --log-file stdout --stderr stdout --stdout \"${DATA_DIR}/logs/agent_service.log\" --log-level info $(quote_indent "$@")"
-
+    CMD_JUICE_EXEC="agent run --service --service-config \"${DATA_DIR}/agent_service.cfg\" --config-directory \"${DATA_DIR}\" --log-file stdout --stderr stdout --stdout \"${DATA_DIR}/logs/agent_service.log\" $(quote_indent "$@")"
 
     # --- check for invalid characters in system name ---
     valid_chars=$(printf '%s' "${SYSTEM_NAME}" | sed -e 's/[][!#$%&()*;<=>?\_`{|}/[:space:]]/^/g;' )
