@@ -604,7 +604,7 @@ create_users_and_directories() {
         agent service install \
         --config-directory ${DATA_DIR} \
         --desktop-user ${uid} \
-        ${INSTALL_JUICE_POOL} > /dev/null 2>&1 || fatal "Could not install service"
+        "${INSTALL_JUICE_POOL}" > /dev/null 2>&1 || fatal "Could not install service"
 
     $SUDO chown -R ${INSTALL_USER}:${INSTALL_USER} ${DATA_DIR}
 }
@@ -768,7 +768,7 @@ eval set -- $(escape "${INSTALL_JUICE_EXEC}") $(quote "$@")
     install_binaries
     create_symlinks
 
-    if [ ! -z $INSTALL_JUICE_POOL ]; then
+    if [ ! -z "${INSTALL_JUICE_POOL}" ]; then
         create_users_and_directories
         create_service_file
         service_enable_and_start
